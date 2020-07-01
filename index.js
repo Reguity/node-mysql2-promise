@@ -10,7 +10,6 @@ function DB() {
 
 DB.prototype.getConnection = function () {
   return this.pool.getConnection().then((conn)=> {
-    console.log('getting connection');
     let exec = conn.execute;
     conn.select = function(query, params) {
       return exec.call(this, query, params).then((results) => {
@@ -39,17 +38,15 @@ DB.prototype.query = function (query, params) {
   let connection;
 
   return this.pool.getConnection().then((conn)=> {
-    console.log('getting connection');
     connection = conn;
     return connection.execute(query, params);
   }).then((results) => {
     if (connection && connection.connection) {
       connection.connection.unprepare(query);
       connection.release();
-      console.log('ok - released connection');
     }
 
-    return results[0];
+    return results;
   }).catch(err => {
     if (!connection) {
       console.error('could not establish db connection', err.message);
